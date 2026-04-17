@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+const { useState } = React;
 
-import { View, Text, Button, StyleSheet, ScrollView, Share } from 'react-native';
-
-export default function App() {
+function App() {
   const [consommations, setConsommations] = useState({
     cafe: 0,
     chocolat: 0,
@@ -19,103 +17,76 @@ export default function App() {
   };
 
   const resetSemaine = () => {
-    setConsommations({
-      cafe: 0,
-      chocolat: 0,
-      creme: 0,
-      noisette: 0,
-      jusOrange: 0,
-    });
+    if(confirm("Voulez-vous vraiment effacer les compteurs ?")) {
+        setConsommations({
+          cafe: 0,
+          chocolat: 0,
+          creme: 0,
+          noisette: 0,
+          jusOrange: 0,
+        });
+    }
   };
 
-  // Fonction pour générer le rapport
   const generateRapport = () => {
     const { cafe, chocolat, creme, noisette, jusOrange } = consommations;
-    return `
-Rapport de la semaine :
+    return `Rapport de la semaine :
 Café : ${cafe}
 Chocolat : ${chocolat}
 Crème : ${creme}
 Noisette : ${noisette}
 Jus d’orange : ${jusOrange}
-Total : ${cafe + chocolat + creme + noisette + jusOrange}
-`;
+Total : ${cafe + chocolat + creme + noisette + jusOrange}`;
   };
 
-  // Fonction pour partager le rapport
-  const partagerRapport = async () => {
+  const partagerRapport = () => {
     const rapport = generateRapport();
-    try {
-      await Share.share({ message: rapport });
-    } catch (error) {
-      alert('Erreur lors du partage');
+    if (navigator.share) {
+      navigator.share({
+        title: 'Rapport Consos',
+        text: rapport,
+      }).catch(() => alert('Erreur de partage'));
+    } else {
+      alert("Voici votre rapport :\n" + rapport);
     }
   };
 
+  // Styles simplifiés pour le Web
+  const styles = {
+    container: { padding: '20px', fontFamily: 'sans-serif', textAlign: 'center', maxWidth: '400px', margin: 'auto' },
+    title: { fontSize: '24px', color: '#333' },
+    item: { 
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+        padding: '10px', borderBottom: '1px solid #eee', marginBottom: '10px' 
+    },
+    button: { padding: '8px 15px', backgroundColor: '#007AFF', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' },
+    btnReset: { marginTop: '20px', padding: '10px', backgroundColor: '#FF3B30', color: 'white', border: 'none', borderRadius: '5px', width: '100%' },
+    btnShare: { marginTop: '10px', padding: '10px', backgroundColor: '#34C759', color: 'white', border: 'none', borderRadius: '5px', width: '100%' }
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Comptage des consommations</Text>
+    <div style={styles.container}>
+      <h1 style={styles.title}>Comptage Consomatin</h1>
 
-      {/* Café */}
-      <View style={styles.item}>
-        <Text>Café : {consommations.cafe}</Text>
-        <Button title="Ajouter Café" onPress={() => ajouter('cafe')} />
-      </View>
+      {[
+        { id: 'cafe', label: 'Café' },
+        { id: 'chocolat', label: 'Chocolat' },
+        { id: 'creme', label: 'Crème' },
+        { id: 'noisette', label: 'Noisette' },
+        { id: 'jusOrange', label: 'Jus d’orange' }
+      ].map(item => (
+        <div key={item.id} style={styles.item}>
+          <span>{item.label} : <strong>{consommations[item.id]}</strong></span>
+          <button style={styles.button} onClick={() => ajouter(item.id)}>Ajouter</button>
+        </div>
+      ))}
 
-      {/* Chocolat */}
-      <View style={styles.item}>
-        <Text>Chocolat : {consommations.chocolat}</Text>
-        <Button title="Ajouter Chocolat" onPress={() => ajouter('chocolat')} />
-      </View>
-
-      {/* Crème */}
-      <View style={styles.item}>
-        <Text>Crème : {consommations.creme}</Text>
-        <Button title="Ajouter Crème" onPress={() => ajouter('creme')} />
-      </View>
-
-      {/* Noisette */}
-      <View style={styles.item}>
-        <Text>Noisette : {consommations.noisette}</Text>
-        <Button title="Ajouter Noisette" onPress={() => ajouter('noisette')} />
-      </View>
-
-      {/* Jus d'orange */}
-      <View style={styles.item}>
-        <Text>Jus d’orange : {consommations.jusOrange}</Text>
-        <Button title="Ajouter Jus" onPress={() => ajouter('jusOrange')} />
-      </View>
-
-      {/* Bouton pour réinitialiser la semaine */}
-      <View style={styles.reset}>
-        <Button title="Effacer cette semaine" color="red" onPress={resetSemaine} />
-      </View>
-
-      {/* Bouton pour partager */}
-      <View style={styles.shareButton}>
-        <Button title="Partager le rapport" onPress={partagerRapport} />
-      </View>
-    </ScrollView>
+      <button style={styles.btnReset} onClick={resetSemaine}>Effacer cette semaine</button>
+      <button style={styles.btnShare} onClick={partagerRapport}>Partager le rapport</button>
+    </div>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 22,
-    marginBottom: 20,
-  },
-  item: {
-    marginVertical: 10,
-    width: '100%',
-  },
-  reset: {
-    marginTop: 30,
-  },
-  shareButton: {
-    marginTop: 20,
-  },
-});
+// La ligne magique pour afficher l'appli dans le <div id="root">
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
