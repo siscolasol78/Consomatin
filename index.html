@@ -4,14 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consomatin</title>
-    
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        .item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        button { padding: 8px 15px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-add { background-color: #007AFF; color: white; }
+        .btn-reset { background-color: #FF3B30; color: white; width: 100%; margin-top: 20px; padding: 12px; }
+        .btn-share { background-color: #34C759; color: white; width: 100%; margin-top: 10px; padding: 12px; }
+    </style>
 </head>
 <body>
     <div id="root"></div>
 
-    <script type="text/babel" src="app.js"></script>
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [consos, setConsos] = useState({ cafe: 0, chocolat: 0, creme: 0, noisette: 0, jus: 0 });
+
+            const ajouter = (cat) => setConsos(prev => ({ ...prev, [cat]: prev[cat] + 1 }));
+            
+            const partager = () => {
+                const txt = `Rapport : Café(${consos.cafe}), Chocolat(${consos.chocolat}), Crème(${consos.creme}), Noisette(${consos.noisette}), Jus(${consos.jus})`;
+                if (navigator.share) navigator.share({ title: 'Consos', text: txt });
+                else alert(txt);
+            };
+
+            return (
+                <div className="card">
+                    <h1>Consomatin</h1>
+                    <div className="item"><span>Café : <b>{consos.cafe}</b></span> <button className="btn-add" onClick={() => ajouter('cafe')}>+</button></div>
+                    <div className="item"><span>Chocolat : <b>{consos.chocolat}</b></span> <button className="btn-add" onClick={() => ajouter('chocolat')}>+</button></div>
+                    <div className="item"><span>Crème : <b>{consos.creme}</b></span> <button className="btn-add" onClick={() => ajouter('creme')}>+</button></div>
+                    <div className="item"><span>Noisette : <b>{consos.noisette}</b></span> <button className="btn-add" onClick={() => ajouter('noisette')}>+</button></div>
+                    <div className="item"><span>Jus : <b>{consos.jus}</b></span> <button className="btn-add" onClick={() => ajouter('jus')}>+</button></div>
+                    
+                    <button className="btn-reset" onClick={() => setConsos({cafe:0, chocolat:0, creme:0, noisette:0, jus:0})}>Réinitialiser</button>
+                    <button className="btn-share" onClick={partager}>Partager le rapport</button>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
